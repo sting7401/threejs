@@ -1,10 +1,5 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-window.addEventListener('load', () => {
-	init();
-});
-
+import { OrbitControls } from 'three/addons/controls/OrbitControls';
 const init = () => {
 	const renderer = new THREE.WebGLRenderer({
 		alpha: true,
@@ -43,3 +38,8 @@ const init = () => {
 
 	window.addEventListener('resize', handleResize);
 };
+
+
+window.addEventListener('load', () => {
+	init();
+});
