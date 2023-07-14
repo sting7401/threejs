@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls';
 
+import { convertPosition, getGradientCanvas } from './utils.js';
+
 export default async () => {
 	const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 	renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -48,9 +50,10 @@ export default async () => {
 
 	const addLight = () => {
 		const light = new THREE.DirectionalLight(0xffffff);
-		light.position.set(2.65, 2.13, 1.02);
+		const light2 = new THREE.AmbientLight(0xffffff);
+		light2.position.set(2.65, 2.13, 1.02);
 
-		scene.add(light);
+		scene.add(light2);
 	};
 
 	const createEarth1 = () => {
@@ -59,12 +62,13 @@ export default async () => {
 			map: img,
 			roughness: 0,
 			metalness: 0,
-			side: THREE.FrontSide,
 			opacity: 0.6,
 			transparent: true,
 		});
 		const geometry = new THREE.SphereGeometry(1.3, 30, 30);
 		const mesh = new THREE.Mesh(geometry, material);
+
+		mesh.rotation.y = -Math.PI / 2;
 
 		return mesh;
 	};
@@ -80,11 +84,15 @@ export default async () => {
 		const geometry = new THREE.SphereGeometry(1.5, 30, 30);
 		const mesh = new THREE.Mesh(geometry, material);
 
+		mesh.rotation.y = -Math.PI / 2;
+
 		return mesh;
 	};
 
 	const createStar = (count = 500) => {
 		const positions = new Float32Array(count * 3);
+
+		console.log(positions);
 
 		for (let i = 0; i < count; i += 1) {
 			positions[i] = (Math.random() - 0.5) * 5; // -3~3
@@ -112,16 +120,98 @@ export default async () => {
 		return star;
 	};
 
+	const createPoint1 = () => {
+		const seoulPoint = {
+			lat: 37.56668 * (Math.PI / 180),
+			lng: 126.97841 * (Math.PI / 180),
+		};
+
+		const position = convertPosition(seoulPoint, 1.3);
+
+		const mesh = new THREE.Mesh(
+			new THREE.TorusGeometry(0.02, 0.002, 20, 20),
+			new THREE.MeshBasicMaterial({ color: 0x263d64 }),
+		);
+
+		mesh.position.set(position.x, position.y, position.z);
+
+		mesh.rotation.set(0.9, 2.46, 1);
+
+		return mesh;
+	};
+
+	const createPoint2 = () => {
+		const seoulPoint = {
+			lat: 5.55363 * (Math.PI / 180),
+			lng: -0.196481 * (Math.PI / 180),
+		};
+
+		const position = convertPosition(seoulPoint, 1.3);
+
+		const mesh = new THREE.Mesh(
+			new THREE.TorusGeometry(0.02, 0.002, 20, 20),
+			new THREE.MeshBasicMaterial({ color: 0x263d64 }),
+		);
+
+		mesh.position.set(position.x, position.y, position.z);
+
+		return mesh;
+	};
+
+	const createCurve = (position1, position2) => {
+		let points = [];
+
+		for (let i = 0; i <= 100; i += 1) {
+			const position = new THREE.Vector3().lerpVectors(
+				position1,
+				position2,
+				i / 100,
+			);
+
+			position.normalize();
+
+			const wave = Math.sin((Math.PI * i) / 100);
+
+			position.multiplyScalar(1.3 + 0.4 * wave);
+
+			points.push(position);
+		}
+		const curve = new THREE.CatmullRomCurve3(points);
+		// const curve = new THREE.CatmullRomCurve3([
+		// 	position1,
+		// 	position2,
+		// 	// new THREE.Vector3(-3, 0, 0),
+		// 	// new THREE.Vector3(0, 3, 0),
+		// 	// new THREE.Vector3(3, 0, 0),
+		// ]);
+
+		const gradientCanvas = getGradientCanvas('#757f94', '#263d74');
+		const texture = new THREE.CanvasTexture(gradientCanvas);
+
+		const geometry = new THREE.TubeGeometry(curve, 20, 0.003);
+		const material = new THREE.MeshBasicMaterial({ map: texture });
+
+		const mesh = new THREE.Mesh(geometry, material);
+
+		return mesh;
+	};
+
 	const create = () => {
+		const earthGroup = new THREE.Group();
+
 		const earth1 = createEarth1();
 		const earth2 = createEarth2();
 		const star = createStar();
+		const point1 = createPoint1();
+		const point2 = createPoint2();
+		const curve = createCurve(point1.position, point2.position);
 
-		scene.add(earth1, earth2, star);
+		earthGroup.add(earth1, earth2, point1, point2, curve);
+
+		scene.add(earthGroup, star);
 
 		return {
-			earth1,
-			earth2,
+			earthGroup,
 			star,
 		};
 	};
@@ -148,13 +238,10 @@ export default async () => {
 	};
 
 	const draw = obj => {
-		const { earth1, earth2, star } = obj;
+		const { earthGroup, star } = obj;
 
-		earth1.rotation.x += 0.0005;
-		earth1.rotation.y += 0.0005;
-
-		earth2.rotation.x -= 0.0005;
-		earth2.rotation.y -= 0.0005;
+		earthGroup.rotation.x -= 0.0005;
+		earthGroup.rotation.y -= 0.0005;
 
 		star.rotation.x += 0.001;
 		star.rotation.y += 0.001;

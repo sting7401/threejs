@@ -61,6 +61,7 @@ export default () => {
 	const draw = () => {
 		controls.update();
 		renderer.render(scene, camera);
+
 		requestAnimationFrame(() => {
 			draw();
 		});
