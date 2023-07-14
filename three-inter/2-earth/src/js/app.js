@@ -45,8 +45,8 @@ export default async () => {
 	);
 	camera.position.set(0, 0, 3);
 	const controls = new OrbitControls(camera, renderer.domElement);
-	controls.enableDamping = true;
-	controls.dampingFactor = 0.1;
+	controls.enableDamping = true; // 스무스한 움직임
+	controls.dampingFactor = 0.1; // 스무스한 움직임
 
 	const addLight = () => {
 		const light = new THREE.DirectionalLight(0xffffff);
@@ -89,10 +89,24 @@ export default async () => {
 		return mesh;
 	};
 
+	const createSun = () => {
+		const img = textureLoader.load('2k_sun.jpg');
+		const material = new THREE.MeshStandardMaterial({
+			map: img,
+			opacity: 0.9,
+			transparent: true,
+			side: THREE.BackSide,
+		});
+		const geometry = new THREE.SphereGeometry(10, 30, 30);
+		const mesh = new THREE.Mesh(geometry, material);
+
+		mesh.position.set(10, 10, 10);
+
+		return mesh;
+	};
+
 	const createStar = (count = 500) => {
 		const positions = new Float32Array(count * 3);
-
-		console.log(positions);
 
 		for (let i = 0; i < count; i += 1) {
 			positions[i] = (Math.random() - 0.5) * 5; // -3~3
@@ -112,7 +126,7 @@ export default async () => {
 			depthWrite: false,
 			map: textureLoader.load('particle.png'),
 			alphaMap: textureLoader.load('particle.png'),
-			color: 0xbcc6c6,
+			color: 0xffffff,
 		});
 
 		const star = new THREE.Points(particleGeometry, particleMaterial);
@@ -201,6 +215,7 @@ export default async () => {
 
 		const earth1 = createEarth1();
 		const earth2 = createEarth2();
+		const sun = createSun();
 		const star = createStar();
 		const point1 = createPoint1();
 		const point2 = createPoint2();
@@ -208,10 +223,11 @@ export default async () => {
 
 		earthGroup.add(earth1, earth2, point1, point2, curve);
 
-		scene.add(earthGroup, star);
+		scene.add(earthGroup, star, sun);
 
 		return {
 			earthGroup,
+			sun,
 			star,
 		};
 	};
@@ -236,15 +252,21 @@ export default async () => {
 			false,
 		);
 	};
-
+	const clock = new THREE.Clock();
 	const draw = obj => {
-		const { earthGroup, star } = obj;
+		const elapsedTime = clock.getElapsedTime();
+		const deltaTime = clock.getDelta();
 
-		earthGroup.rotation.x -= 0.0005;
-		earthGroup.rotation.y -= 0.0005;
+		const { earthGroup, star, sun } = obj;
 
-		star.rotation.x += 0.001;
-		star.rotation.y += 0.001;
+		earthGroup.rotation.x -= elapsedTime * 0.0005;
+		earthGroup.rotation.y -= elapsedTime * 0.0005;
+
+		star.rotation.x += elapsedTime * 0.0001;
+		star.rotation.y += elapsedTime * 0.0001;
+
+		sun.rotation.x += elapsedTime * 0.0001;
+		sun.rotation.z += elapsedTime * 0.0001;
 
 		controls.update();
 		renderer.render(scene, camera);
