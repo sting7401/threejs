@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls';
-
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { convertPosition, getGradientCanvas } from './utils.js';
 
 export default async () => {
@@ -173,7 +173,7 @@ export default async () => {
 	};
 
 	const createCurve = (position1, position2) => {
-		let points = [];
+		const points = [];
 
 		for (let i = 0; i <= 100; i += 1) {
 			const position = new THREE.Vector3().lerpVectors(
@@ -253,20 +253,21 @@ export default async () => {
 		);
 	};
 	const clock = new THREE.Clock();
+
 	const draw = obj => {
 		const elapsedTime = clock.getElapsedTime();
 		const deltaTime = clock.getDelta();
 
 		const { earthGroup, star, sun } = obj;
 
-		earthGroup.rotation.x -= elapsedTime * 0.0005;
-		earthGroup.rotation.y -= elapsedTime * 0.0005;
+		earthGroup.rotation.x -= elapsedTime * 0.00005;
+		earthGroup.rotation.y -= elapsedTime * 0.00005;
 
-		star.rotation.x += elapsedTime * 0.0001;
-		star.rotation.y += elapsedTime * 0.0001;
+		star.rotation.x += elapsedTime * 0.00001;
+		star.rotation.y += elapsedTime * 0.00001;
 
-		sun.rotation.x += elapsedTime * 0.0001;
-		sun.rotation.z += elapsedTime * 0.0001;
+		sun.rotation.x += elapsedTime * 0.00001;
+		sun.rotation.z += elapsedTime * 0.00001;
 
 		controls.update();
 		renderer.render(scene, camera);

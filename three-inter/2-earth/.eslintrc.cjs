@@ -10,7 +10,7 @@ module.exports = {
 		es2021: true,
 	},
 	globals: { _: true },
-	plugins: ['import', 'html', 'prettier'],
+	plugins: ['import', 'prettier'],
 	extends: [
 		'airbnb-base',
 		'eslint:recommended',
