@@ -1,11 +1,14 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { convertPosition, getGradientCanvas } from './utils.js';
 
 export default async () => {
 	const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 	renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+	const effectComposer = new EffectComposer(renderer);
 
 	const textureLoader = new THREE.TextureLoader().setPath('./assets/');
 	const cubeTextureLoader = new THREE.CubeTextureLoader().setPath(
@@ -241,6 +244,8 @@ export default async () => {
 
 		renderer.setSize(canvasSize.width, canvasSize.height);
 		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+		effectComposer.setSize(canvasSize.width, canvasSize.height);
 	};
 
 	const addEvent = () => {
