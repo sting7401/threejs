@@ -1,16 +1,28 @@
 module.exports = {
-	env: {
-		browser: true,
-		es2021: true,
-		node: true,
-	},
-	extends: ['aribnb', 'prettier'],
-	overrides: [],
 	parserOptions: {
 		ecmaVersion: 'latest',
-		sourceType: 'module',
+		requireConfigFile: 'false',
 	},
+	env: {
+		browser: true,
+		node: true,
+		commonjs: true,
+		es2021: true,
+	},
+	globals: { _: true },
+	plugins: ['import', 'prettier'],
+	extends: [
+		'airbnb-base',
+		'eslint:recommended',
+		'plugin:prettier/recommended',
+		// "react-app"
+	],
+	ignorePatterns: ['node_modules/*', 'dist', 'examples', 'lib'],
 	rules: {
-		'prettier/prettier': 'error', // prettier 의 포맷팅 에러를 lint 에러 리포팅으로 볼 수 있도록 하는 규칙
+		// "off" or 0 - turn the rule off
+		'no-console': 'warn',
+		'no-unused-vars': 'off',
+		'max-classes-per-file': 'off',
+		'no-restricted-syntax': ['off', 'ForOfStatement'], // disallow specified syntax(ex. WithStatement)
 	},
 };

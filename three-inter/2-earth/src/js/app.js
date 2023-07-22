@@ -2,6 +2,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js';
+import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/shaderpass.js';
+import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass.js';
+import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
+import { HalftonePass } from 'three/examples/jsm/postprocessing/HalftonePass.js';
 import { convertPosition, getGradientCanvas } from './utils.js';
 
 export default async () => {
@@ -46,6 +52,7 @@ export default async () => {
 		0.1, // 카메라와 가까운 거리
 		100, // 카메라와 가장 먼 거리
 	);
+
 	camera.position.set(0, 0, 3);
 	const controls = new OrbitControls(camera, renderer.domElement);
 	controls.enableDamping = true; // 스무스한 움직임
@@ -57,6 +64,24 @@ export default async () => {
 		light2.position.set(2.65, 2.13, 1.02);
 
 		scene.add(light2);
+	};
+
+	const addPostEffect = () => {
+		const renderPass = new RenderPass(scene, camera);
+		effectComposer.addPass(renderPass);
+		const shaderPass = new ShaderPass(GammaCorrectionShader);
+
+		const filmPass = new FilmPass(1, 0.5, 4096, false);
+		// effectComposer.addPass(filmPass);
+
+		const glitchPass = new GlitchPass();
+		// effectComposer.addPass(glitchPass);
+		// glitchPass.goWild = true;
+
+		const afterimagePass = new AfterimagePass(0.9);
+
+		// effectComposer.addPass(afterimagePass);
+		effectComposer.addPass(shaderPass);
 	};
 
 	const createEarth1 = () => {
@@ -275,15 +300,18 @@ export default async () => {
 		sun.rotation.z += elapsedTime * 0.00001;
 
 		controls.update();
-		renderer.render(scene, camera);
+		effectComposer.render();
+		//  renderer.render(scene, camera);
 		requestAnimationFrame(() => {
 			draw(obj);
 		});
 	};
 
 	const init = async () => {
-		addLight();
 		const obj = create();
+
+		addLight();
+		addPostEffect();
 		addEvent();
 		resize();
 		draw(obj);

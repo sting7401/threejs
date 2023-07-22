@@ -1,10 +1,6 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls';
 import GUI from 'lil-gui';
-
-window.addEventListener('load', () => {
-    init();
-});
 
 const init = () => {
     const options = {
@@ -128,6 +124,7 @@ const init = () => {
         .min(-3)
         .max(3)
         .step(0.1);
+    gui.add(cube.position,'x').min(0).max(0).step(0.1);
 
     gui.add(cube, 'visible');
 
@@ -135,3 +132,9 @@ const init = () => {
         cube.material.color.set(value);
     });
 };
+
+window.addEventListener('load', () => {
+    init();
+});
+
+export default init
