@@ -7,6 +7,8 @@
 
 <T.Mesh dispose={false}>
 	<T.BoxGeometry />
+
+	<T.SphereGeometry />
 	<T.MeshStandardMaterial map={$map} />
 	<T.Mesh dispose>
 		<T.BoxGeometry />
