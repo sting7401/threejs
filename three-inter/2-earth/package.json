@@ -4,22 +4,22 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite --host 192.168.1.20 --port 4000",
+		"dev": "vite --host --port 4000",
 		"build": "vite build",
 		"preview": "vite preview",
 		"preinstall": "npx only-allow pnpm"
 	},
 	"devDependencies": {
-		"eslint": "^8.41.0",
+		"eslint": "^8.54.0",
 		"eslint-config-airbnb-base": "^15.0.0",
-		"eslint-config-prettier": "^8.8.0",
-		"eslint-plugin-import": "^2.27.5",
-		"eslint-plugin-prettier": "^4.2.1",
-		"prettier": "^2.8.8",
-		"sass": "^1.62.1",
-		"vite": "^4.3.2"
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-plugin-import": "^2.29.0",
+		"eslint-plugin-prettier": "^5.0.1",
+		"prettier": "^3.1.0",
+		"sass": "^1.69.5",
+		"vite": "^5.0.0"
 	},
 	"dependencies": {
-		"three": "^0.152.2"
+		"three": "^0.158.0"
 	}
 }
