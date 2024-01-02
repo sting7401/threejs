@@ -1,6 +1,7 @@
 import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const color = (props) => {
 	return new THREE.Color(props);
@@ -55,20 +56,62 @@ const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 floorMesh.rotation.x = -Math.PI / 2; // 90도 회전
 floorMesh.receiveShadow = true; // 그림자 받을수 있게
 floorMesh.castShadow = true; // 빛이 그림자를 만들수 있게
+floorMesh.name = 'FLOOR';
 scene.add(floorMesh);
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
 const boxMaterial = new THREE.MeshStandardMaterial({
 	color: color(0xffff00),
 });
-const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-boxMesh.position.set(0, 0.5, 0);
-boxMesh.castShadow = true; //
-boxMesh.receiveShadow = true;
-scene.add(boxMesh);
+// const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+// boxMesh.position.set(0, 0.5, 0);
+// boxMesh.castShadow = true; //
+// boxMesh.receiveShadow = true;
+// scene.add(boxMesh);
 
 const orbit = new OrbitControls(camera, renderer.domElement);
-orbit.update();
+// orbit.enableDamping = true;
+orbit.dampingFactor = 0.03;
+
+const newPosition = new THREE.Vector3(0,1,0);
+const rayCaster = new THREE.Raycaster();
+
+renderer.domElement.addEventListener('pointerdown', (e)=> {
+	const x = (e.clientX / window.innerWidth )* 2 - 1;
+	const y = -((e.clientY / window.innerHeight ) * 2  -1);
+
+	rayCaster.setFromCamera(new THREE.Vector2(x,y), camera);
+	const intersects = rayCaster.intersectObjects(scene.children);
+
+const intersectFloor = intersects.find(i => i.object.name ==='FLOOR')
+console.log(intersectFloor);
+
+newPosition.copy(intersectFloor.point);
+newPosition.y = 1;
+})
+
+const loader = new GLTFLoader();
+const gltf = await loader.loadAsync('/dancer.glb')
+const character = gltf.scene;
+const animationClips = gltf.animations;
+console.dir(gltf);
+character.position.y = 0.8;
+character.scale.set(0.01,0.01,0.01);
+character.castShadow = true;
+character.receiveShadow = true;
+character.traverse(obj => {
+	if(obj.isMesh) {
+		obj.castShadow = true;
+		obj.receiveShadow = true;
+	}
+})
+scene.add(character);
+
+const mixer = new THREE.AnimationMixer(character);
+const action = mixer.clipAction(animationClips[0]);
+action.setLoop(THREE.LoopRepeat);
+action.play();
+
 
 window.addEventListener('resize', () => {
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -77,9 +120,28 @@ window.addEventListener('resize', () => {
 	renderer.render(scene, camera);
 });
 
+const clock = new THREE.Clock()
+
+const targetVector = new THREE.Vector3();
+
 const render = () => {
+	character.lookAt(newPosition);
+	targetVector.subVectors(newPosition, character.position).normalize().multiplyScalar(0.01);
+
+	if(Math.abs(character.position.x - newPosition.x) >= 1 || Math.abs(character.position.z - newPosition.z) >= 1) {
+		character.position.x += targetVector.x;
+		character.position.z += targetVector.z;
+		action.stop()
+	}
+
+	action.play();
 	renderer.render(scene, camera);
 	requestAnimationFrame(render);
+	orbit.update();
+
+	if(mixer) {
+		mixer.update(clock.getDelta())
+	}
 };
 
 render();

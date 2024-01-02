@@ -19,4 +19,7 @@ module.exports = {
 	requirePragma: false, // 파일 상단에 미리 정의된 주석을 작성하고 Pragma로 포맷팅 사용 여부 지정 (v1.8.0)
 	insertPragma: false, // 미리 정의된 @format marker의 사용 여부 (v1.8.0)
 	// htmlWhitespaceSensitivity: 'ignore',
+	// plugins: ['prettier-plugin-svelte'],
+	// pluginSearchDirs: ['.'],
+	// overrides: [{ files: '*.svelte', options: { parser: 'svelte' } }],
 };
