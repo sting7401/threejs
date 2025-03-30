@@ -1,17 +1,25 @@
 <script>
-	import { T, Mesh, useTexture } from '@threlte/core';
-	import { BoxBufferGeometry, MeshStandardMaterial } from 'three';
-	const map = useTexture('/some/texture');
-	const material = new MeshStandardMaterial({ map });
+	import { RepeatWrapping } from 'three';
+	import { T } from '@threlte/core';
+	import { useTexture } from '@threlte/extras';
+
+	// 이미지 경로 확인
+	const img = '/src/lib/images/FloorsCheckerboard_S_Diffuse.jpg'; // 경로를 명확히 지정
+	const texture = useTexture(img, {
+		transform: (texture) => {
+			texture.wrapS = RepeatWrapping;
+			texture.wrapT = RepeatWrapping;
+			texture.repeat.set(1, 1);
+			return texture;
+		}
+	});
 </script>
 
-<T.Mesh dispose={false}>
-	<T.BoxGeometry />
-
-	<T.SphereGeometry />
-	<T.MeshStandardMaterial map={$map} />
-	<T.Mesh dispose>
-		<T.BoxGeometry />
-		<T.MeshStandardMaterial map={$map} />
+{#await texture then map}
+	<T.Mesh>
+		<T.SphereGeometry />
+		<T.MeshBasicMaterial {map} />
 	</T.Mesh>
-</T.Mesh>
+{:catch error}
+	<p>Error loading texture: {error.message}</p>
+{/await}
